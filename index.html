@@ -1,1 +1,517 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI HUB</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #080d1b;
+  color: #edf2ff;
+  font-family: Arial, sans-serif;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 250px;
+  background: #0b1222;
+  border-right: 1px solid #25324c;
+  padding: 20px;
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.logo .brain {
+  font-size: 45px;
+}
+
+.logo h1 {
+  margin: 5px;
+  font-size: 28px;
+}
+
+.logo p {
+  color: #91a4c4;
+}
+
+button {
+  cursor: pointer;
+  color: white;
+  font-size: 14px;
+}
+
+.new-chat {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(120deg, #7551f5, #2779ff);
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.nav button {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 12px;
+  border-radius: 10px;
+  color: #cbd7ef;
+}
+
+.nav button:hover {
+  background: #18243b;
+}
+
+.status {
+  margin-top: 25px;
+  padding: 15px;
+  border-radius: 13px;
+  background: #16223a;
+  border: 1px solid #2a3a58;
+  color: #9fb2d1;
+  font-size: 13px;
+}
+
+.status strong {
+  display: block;
+  color: #36dba0;
+  font-size: 18px;
+  margin: 8px 0;
+}
+
+.favorites {
+  margin-top: 25px;
+  color: #8fa4c6;
+  font-size: 13px;
+}
+
+.favorites button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: #d5e0f7;
+  padding: 10px;
+}
+
+.main {
+  flex: 1;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.modes {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.mode {
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid #283751;
+  background: #121c30;
+  white-space: nowrap;
+}
+
+.mode.active {
+  background: linear-gradient(120deg, #744df2, #2581ff);
+}
+
+.welcome {
+  text-align: center;
+  margin: 45px 0 25px;
+}
+
+.welcome h2 {
+  font-size: 32px;
+}
+
+.welcome p {
+  color: #9aaccb;
+}
+
+.big-brain {
+  font-size: 60px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 25px;
+}
+
+.card {
+  padding: 18px;
+  text-align: center;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #172542, #111a2d);
+  border: 1px solid #2b3c5d;
+  cursor: pointer;
+}
+
+.card:hover {
+  border-color: #647bce;
+  transform: translateY(-2px);
+}
+
+.card .icon {
+  font-size: 28px;
+}
+
+.card h3 {
+  margin: 10px 0;
+}
+
+.card p {
+  color: #9eafd0;
+  font-size: 13px;
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 42vh;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+
+.message {
+  padding: 14px;
+  border-radius: 15px;
+  max-width: 85%;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.user {
+  align-self: flex-end;
+  background: #294d91;
+}
+
+.assistant {
+  align-self: flex-start;
+  background: #162139;
+  border: 1px solid #293955;
+}
+
+.composer {
+  margin-top: auto;
+  padding: 15px;
+  background: #17233d;
+  border: 1px solid #344768;
+  border-radius: 18px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  color: white;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+.tools {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.tool {
+  padding: 10px 13px;
+  background: #121e35;
+  border: 1px solid #2c3b59;
+  border-radius: 30px;
+}
+
+.tool:hover {
+  border-color: #7787e9;
+}
+
+.send {
+  margin-left: auto;
+  width: 45px;
+  height: 45px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(120deg, #744df2, #2481ff);
+  font-size: 20px;
+}
+
+.examples {
+  margin-top: 20px;
+}
+
+.examples p {
+  color: #9aaccb;
+}
+
+.example {
+  margin: 4px;
+  padding: 11px 14px;
+  border-radius: 25px;
+  background: #17233d;
+  border: 1px solid #293956;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  color: #93a6c6;
+  font-size: 12px;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+@media(max-width: 850px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media(max-width: 600px) {
+  .sidebar {
+    display: none;
+  }
+
+  .main {
+    padding: 12px;
+  }
+
+  .welcome {
+    margin: 25px 0;
+  }
+
+  .welcome h2 {
+    font-size: 25px;
+  }
+
+  .cards {
+    gap: 8px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<aside class="sidebar">
+
+<div class="logo">
+<div class="brain">🧠</div>
+<h1>AI HUB</h1>
+<p>Ton centre de commande IA</p>
+</div>
+
+<button class="new-chat" onclick="newChat()">
+＋ Nouvelle conversation
+</button>
+
+<div class="nav">
+<button onclick="showInfo('Historique bientôt disponible')">◷ Conversations récentes</button>
+<button onclick="showInfo('Favoris bientôt disponibles')">★ Favoris</button>
+<button onclick="showInfo('Outils à venir')">⚒ Outils</button>
+<button onclick="showInfo('Paramètres à venir')">⚙ Paramètres</button>
+<button onclick="showInfo('AI HUB version 1')">ⓘ À propos</button>
+</div>
+
+<div class="status">
+⚡ Mode actuel
+<strong id="currentMode">Auto</strong>
+Prototype d'interface — connexion IA à venir.
+</div>
+
+<div class="favorites">
+♥ TES IA FAVORITES
+<button onclick="setMode('Chat rapide')">◉ ChatGPT</button>
+<button onclick="setMode('IA Avancée')">✳ Claude</button>
+<button onclick="setMode('IA Recherche')">✦ Gemini</button>
+<button onclick="setMode('Chat rapide')">◈ DeepSeek</button>
+<button onclick="showInfo('Ajout de modèles bientôt')">＋ Ajouter une IA</button>
+</div>
+
+</aside>
+
+<main class="main">
+
+<div class="modes">
+<button class="mode active" onclick="setMode('Auto',this)">✨ Auto</button>
+<button class="mode" onclick="setMode('Chat rapide',this)">⚡ Chat rapide</button>
+<button class="mode" onclick="setMode('IA Avancée',this)">🧠 IA Avancée</button>
+<button class="mode" onclick="setMode('IA Code',this)">⌘ IA Code</button>
+<button class="mode" onclick="setMode('IA Créative',this)">🎨 IA Créative</button>
+<button class="mode" onclick="setMode('IA Recherche',this)">🔎 IA Recherche</button>
+<button class="mode" onclick="setMode('Multi-IA',this)">♧ Multi-IA</button>
+</div>
+
+<section class="welcome" id="welcome">
+<div class="big-brain">🧠</div>
+<h2>Bienvenue sur AI HUB ! 👋</h2>
+<p>Pose ta question, explore les possibilités et laisse la magie de l'IA opérer...</p>
+</section>
+
+<div class="cards" id="cards">
+
+<div class="card" onclick="setMode('Auto')">
+<div class="icon">🚀</div>
+<h3>Mode automatique</h3>
+<p>Une IA adaptée à ta demande</p>
+</div>
+
+<div class="card" onclick="setMode('Multi-IA')">
+<div class="icon">👥</div>
+<h3>Multi-IA</h3>
+<p>Compare plusieurs réponses</p>
+</div>
+
+<div class="card" onclick="setMode('IA Recherche')">
+<div class="icon">🔎</div>
+<h3>Recherche & synthèse</h3>
+<p>Recherche web et synthèse</p>
+</div>
+
+<div class="card" onclick="setMode('IA Créative')">
+<div class="icon">🎨</div>
+<h3>Studio de création</h3>
+<p>Rédaction, code, idées...</p>
+</div>
+
+</div>
+
+<div class="chat" id="chat"></div>
+
+<div class="composer">
+
+<textarea id="prompt"
+placeholder="Pose-moi une question ou demande-moi quelque chose..."
+onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+
+<div class="tools">
+<button class="tool" onclick="showInfo('Import de fichiers à venir')">📎 Fichier</button>
+<button class="tool" onclick="showInfo('Analyse d’image à venir')">▧ Image</button>
+<button class="tool" onclick="setMode('IA Recherche')">🌐 Recherche web</button>
+<button class="tool" onclick="showInfo('Réflexion approfondie à venir')">💡 Réflexion profonde</button>
+<button class="tool" onclick="setMode('Multi-IA')">⚖ Comparer les IA</button>
+<button class="send" onclick="sendMessage()">➤</button>
+</div>
+
+</div>
+
+<div class="examples">
+<p>✦ Exemples de demandes :</p>
+<button class="example" onclick="fill('Donne-moi des idées de voyage en famille')">💡 Voyage en famille</button>
+<button class="example" onclick="fill('Explique-moi ce code Python')">⌘ Explique ce code</button>
+<button class="example" onclick="fill('Analyse ce tableau et fais un résumé')">▥ Analyse de données</button>
+<button class="example" onclick="fill('Écris un message touchant pour Marion')">✎ Écris un message</button>
+</div>
+
+<div class="footer">
+<span>🟢 AI HUB prototype</span>
+<span>Version 1 · Projet personnel 🚀</span>
+</div>
+
+</main>
+</div>
+
+<script>
+
+let mode = "Auto";
+
+function setMode(m,button) {
+mode = m;
+
+document.getElementById("currentMode").textContent = m;
+
+document.querySelectorAll(".mode").forEach(b => {
+b.classList.remove("active");
+});
+
+if(button) {
+button.classList.add("active");
+} else {
+document.querySelectorAll(".mode").forEach(b => {
+if(b.textContent.includes(m)) b.classList.add("active");
+});
+}
+
+}
+
+function fill(text) {
+document.getElementById("prompt").value = text;
+document.getElementById("prompt").focus();
+}
+
+function newChat() {
+document.getElementById("chat").innerHTML = "";
+document.getElementById("welcome").style.display = "block";
+document.getElementById("cards").style.display = "grid";
+document.getElementById("prompt").value = "";
+}
+
+function addMessage(text,type) {
+const div = document.createElement("div");
+div.className = "message " + type;
+div.textContent = text;
+document.getElementById("chat").appendChild(div);
+}
+
+function sendMessage() {
+const box = document.getElementById("prompt");
+const text = box.value.trim();
+
+if(!text) return;
+
+document.getElementById("welcome").style.display = "none";
+document.getElementById("cards").style.display = "none";
+
+addMessage(text,"user");
+
+box.value = "";
+
+addMessage(
+"AI HUB est en cours de construction 🚀\n\nL'interface est prête. Il reste à connecter les modèles IA via une API pour obtenir de vraies réponses.\n\nMode sélectionné : " + mode,
+"assistant"
+);
+
+}
+
+function showInfo(text) {
+alert(text);
+}
+
+</script>
+
+</body>
+</html>
+
