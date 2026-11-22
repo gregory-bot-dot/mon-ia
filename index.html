@@ -486,24 +486,45 @@ div.textContent = text;
 document.getElementById("chat").appendChild(div);
 }
 
-function sendMessage() {
-const box = document.getElementById("prompt");
-const text = box.value.trim();
+async function sendMessage() {
+  const box = document.getElementById("prompt");
+  const text = box.value.trim();
 
-if(!text) return;
+  if(!text) return;
 
-document.getElementById("welcome").style.display = "none";
-document.getElementById("cards").style.display = "none";
+  document.getElementById("welcome").style.display = "none";
+  document.getElementById("cards").style.display = "none";
 
-addMessage(text,"user");
+  addMessage(text,"user");
+  box.value = "";
 
-box.value = "";
+  // Message d'attente
+  const loadingDiv = document.createElement("div");
+  loadingDiv.className = "message assistant";
+  loadingDiv.textContent = "Réflexion en cours...";
+  document.getElementById("chat").appendChild(loadingDiv);
 
-addMessage(
-"AI HUB est en cours de construction 🚀\n\nL'interface est prête. Il reste à connecter les modèles IA via une API pour obtenir de vraies réponses.\n\nMode sélectionné : " + mode,
-"assistant"
-);
+  try {
+    // Connexion à TON proxy Cloudflare
+    const response = await fetch("https://ai-hub-proxy.pasquet-gregory.workers.dev", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "openrouter/free",
+        messages: [{ role: "user", content: text }]
+      })
+    });
 
+    const data = await response.json();
+    
+    // Affichage de la vraie réponse
+    loadingDiv.textContent = data.choices[0].message.content;
+
+  } catch (error) {
+    loadingDiv.textContent = "Oups, une erreur est survenue. Vérifie ta connexion ou tes clés API.";
+  }
 }
 
 function showInfo(text) {
