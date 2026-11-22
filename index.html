@@ -45,6 +45,7 @@ body { margin: 0; background: #080d1b; color: #edf2ff; font-family: Arial, sans-
 
 .new-chat { width: 100%; padding: 12px; border: none; border-radius: 10px; background: linear-gradient(120deg, #7551f5, #2779ff); font-weight: bold; margin-bottom: 15px; color: white; cursor: pointer; }
 
+.link-btn { width: 100%; padding: 12px; border: 1px solid #2c3b59; border-radius: 10px; background: #121e35; color: #cbd7ef; font-size: 14px; cursor: pointer; margin-bottom: 15px; }
 .session-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; }
 .session-item {
   display: flex; justify-content: space-between; align-items: center; gap: 6px;
@@ -102,6 +103,7 @@ body { margin: 0; background: #080d1b; color: #edf2ff; font-family: Arial, sans-
 .actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
 .action-btn { background: transparent; border: 1px solid #2c3b59; color: #9aaccb; border-radius: 14px; padding: 5px 11px; font-size: 12px; cursor: pointer; }
 .action-btn:active { background: #18243b; }
+.model-tag { font-size: 11px; color: #6f83a6; align-self: center; margin-left: auto; }
 
 /* --- SAISIE --- */
 .composer { padding: 12px; background: #17233d; border: 1px solid #344768; border-radius: 15px; flex-shrink: 0; }
@@ -130,6 +132,7 @@ textarea { width: 100%; min-height: 50px; max-height: 140px; resize: none; color
       <button class="close-btn" onclick="toggleSidebar()">✕</button>
     </div>
     <button class="new-chat" onclick="newChat()">＋ Nouvelle discussion</button>
+    <button class="link-btn" onclick="openStoryLab()">🎬 StoryLab &amp; Avatar Lab</button>
     <div class="session-list" id="sessionList"></div>
   </aside>
 
@@ -138,6 +141,7 @@ textarea { width: 100%; min-height: 50px; max-height: 140px; resize: none; color
       <button class="menu-btn" onclick="toggleSidebar()">☰</button>
       <div class="modes">
         <button class="mode" data-mode="auto" onclick="setMode('auto',this)">✨ Auto</button>
+        <button class="mode" data-mode="gemini" onclick="setMode('gemini',this)">🔷 Gemini</button>
         <button class="mode" data-mode="nemotron" onclick="setMode('nemotron',this)">🧠 Nemotron</button>
         <button class="mode" data-mode="gemma" onclick="setMode('gemma',this)">✦ Gemma</button>
         <button class="mode" data-mode="ernie" onclick="setMode('ernie',this)">⚡ ERNIE</button>
@@ -169,7 +173,18 @@ textarea { width: 100%; min-height: 50px; max-height: 140px; resize: none; color
 // RÉGLAGES
 // ==========================================
 const PROXY_URL = "https://ai-hub-proxy.pasquet-gregory.workers.dev";
-const VALID_MODES = ["auto", "nemotron", "gemma", "ernie", "code", "vision"];
+// Adresse complète de ta page StoryLab (ex. "https://gregory-bot-dot.github.io/nom-du-depot/")
+const STORYLAB_URL = "https://gregory-bot-dot.github.io/mon-site/";
+
+function openStoryLab() {
+  if (!STORYLAB_URL) {
+    alert("Adresse de StoryLab non renseignée : modifie la ligne STORYLAB_URL dans index.html.");
+    return;
+  }
+  window.location.href = STORYLAB_URL;   // même onglet : reste dans l'application
+}
+
+const VALID_MODES = ["auto", "gemini", "nemotron", "gemma", "ernie", "code", "vision"];
 
 // ==========================================
 // ÉTAT
@@ -318,6 +333,7 @@ function loadSession(id) {
       } else if (msg.role === 'assistant') {
         const div = addMessageToUI(msg.content, "assistant");
         div._done = true;
+        div._model = msg.model || "";
       }
     });
     refreshActions();
@@ -453,6 +469,12 @@ function refreshActions() {
       regen.textContent = "↻ Régénérer";
       regen.onclick = regenerate;
       bar.appendChild(regen);
+    }
+    if (m._model) {
+      const tag = document.createElement("span");
+      tag.className = "model-tag";
+      tag.textContent = m._model.replace(/:free$/, "");
+      bar.appendChild(tag);
     }
     m.appendChild(bar);
   });
@@ -592,6 +614,7 @@ async function runChat(session, storedText, requestContent, requestMode) {
     }
 
     const chat = document.getElementById("chat");
+    const modelUsed = response.headers.get("X-Model-Used") || "";
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let fullText = "";
@@ -648,9 +671,10 @@ async function runChat(session, storedText, requestContent, requestMode) {
       return;
     }
 
-    session.messages.push({ role: "assistant", content: fullText });
+    session.messages.push({ role: "assistant", content: fullText, model: modelUsed });
     saveSessions();
     loadingDiv._done = true;
+    loadingDiv._model = modelUsed;
 
   } catch (error) {
     loadingDiv.className = "message assistant error";
