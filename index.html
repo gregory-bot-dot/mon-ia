@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -343,13 +342,13 @@ textarea {
 <button onclick="showInfo('Favoris bientôt disponibles')">★ Favoris</button>
 <button onclick="showInfo('Outils à venir')">⚒ Outils</button>
 <button onclick="showInfo('Paramètres à venir')">⚙ Paramètres</button>
-<button onclick="showInfo('AI HUB version 1')">ⓘ À propos</button>
+<button onclick="showInfo('AI HUB version 2 - Connecté à OpenRouter !')">ⓘ À propos</button>
 </div>
 
 <div class="status">
 ⚡ Mode actuel
 <strong id="currentMode">Auto</strong>
-Prototype d'interface — connexion IA à venir.
+Connecté via OpenRouter 🟢
 </div>
 
 <div class="favorites">
@@ -418,8 +417,9 @@ placeholder="Pose-moi une question ou demande-moi quelque chose..."
 onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
 
 <div class="tools">
-<button class="tool" onclick="showInfo('Import de fichiers à venir')">📎 Fichier</button>
-<button class="tool" onclick="showInfo('Analyse d’image à venir')">▧ Image</button>
+<button class="tool" onclick="showInfo('Import de fichiers PDF/Textes à venir')">📎 Fichier</button>
+<button class="tool" onclick="document.getElementById('fileInput').click()">▧ Image</button>
+<input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleImageUpload(this)">
 <button class="tool" onclick="setMode('IA Recherche')">🌐 Recherche web</button>
 <button class="tool" onclick="showInfo('Réflexion approfondie à venir')">💡 Réflexion profonde</button>
 <button class="tool" onclick="setMode('Multi-IA')">⚖ Comparer les IA</button>
@@ -432,13 +432,13 @@ onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendM
 <p>✦ Exemples de demandes :</p>
 <button class="example" onclick="fill('Donne-moi des idées de voyage en famille')">💡 Voyage en famille</button>
 <button class="example" onclick="fill('Explique-moi ce code Python')">⌘ Explique ce code</button>
-<button class="example" onclick="fill('Analyse ce tableau et fais un résumé')">▥ Analyse de données</button>
+<button class="example" onclick="fill('Analyse cette image')">▧ Analyse d'image</button>
 <button class="example" onclick="fill('Écris un message touchant pour Marion')">✎ Écris un message</button>
 </div>
 
 <div class="footer">
-<span>🟢 AI HUB prototype</span>
-<span>Version 1 · Projet personnel 🚀</span>
+<span>🟢 AI HUB v2</span>
+<span>Connecté à OpenRouter 🚀</span>
 </div>
 
 </main>
@@ -447,56 +447,88 @@ onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendM
 <script>
 
 let mode = "Auto";
+window.currentMode = "auto"; 
+window.currentUploadedFile = null;
 
-function setMode(m,button) {
-mode = m;
+function setMode(m, button) {
+  mode = m;
+  document.getElementById("currentMode").textContent = m;
 
-document.getElementById("currentMode").textContent = m;
+  // Routage intelligent pour le proxy
+  if (m.includes("Claude") || m.includes("Avancée")) window.currentMode = "claude";
+  else if (m.includes("Gemini") || m.includes("Recherche")) window.currentMode = "gemini";
+  else window.currentMode = "auto";
 
-document.querySelectorAll(".mode").forEach(b => {
-b.classList.remove("active");
-});
-
-if(button) {
-button.classList.add("active");
-} else {
-document.querySelectorAll(".mode").forEach(b => {
-if(b.textContent.includes(m)) b.classList.add("active");
-});
-}
-
+  document.querySelectorAll(".mode").forEach(b => b.classList.remove("active"));
+  if (button) {
+    button.classList.add("active");
+  } else {
+    document.querySelectorAll(".mode").forEach(b => {
+      if (b.textContent.includes(m)) b.classList.add("active");
+    });
+  }
 }
 
 function fill(text) {
-document.getElementById("prompt").value = text;
-document.getElementById("prompt").focus();
+  document.getElementById("prompt").value = text;
+  document.getElementById("prompt").focus();
 }
 
 function newChat() {
-document.getElementById("chat").innerHTML = "";
-document.getElementById("welcome").style.display = "block";
-document.getElementById("cards").style.display = "grid";
-document.getElementById("prompt").value = "";
+  document.getElementById("chat").innerHTML = "";
+  document.getElementById("welcome").style.display = "block";
+  document.getElementById("cards").style.display = "grid";
+  document.getElementById("prompt").value = "";
+  window.currentUploadedFile = null;
 }
 
-function addMessage(text,type) {
-const div = document.createElement("div");
-div.className = "message " + type;
-div.textContent = text;
-document.getElementById("chat").appendChild(div);
+function addMessage(text, type) {
+  const div = document.createElement("div");
+  div.className = "message " + type;
+  div.textContent = text;
+  document.getElementById("chat").appendChild(div);
+}
+
+function handleImageUpload(input) {
+  if (input.files && input.files[0]) {
+    window.currentUploadedFile = input.files[0];
+    document.getElementById("prompt").value += "\n[Image prête à être analysée] ";
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = error => reject(error);
+  });
 }
 
 async function sendMessage() {
   const box = document.getElementById("prompt");
   const text = box.value.trim();
 
-  if(!text) return;
+  if (!text && !window.currentUploadedFile) return;
 
+  // Cache l'accueil
   document.getElementById("welcome").style.display = "none";
   document.getElementById("cards").style.display = "none";
 
-  addMessage(text,"user");
-  box.value = "";
+  // Affiche le message utilisateur
+  const userDiv = document.createElement("div");
+  userDiv.className = "message user";
+  if (window.currentUploadedFile) {
+    const fileInfo = document.createElement("div");
+    fileInfo.style.fontSize = "12px";
+    fileInfo.style.color = "#a0aec0";
+    fileInfo.textContent = "📸 [Image jointe]";
+    userDiv.appendChild(fileInfo);
+  }
+  const textNode = document.createElement("div");
+  textNode.textContent = text;
+  userDiv.appendChild(textNode);
+  document.getElementById("chat").appendChild(userDiv);
 
   // Message d'attente
   const loadingDiv = document.createElement("div");
@@ -504,35 +536,75 @@ async function sendMessage() {
   loadingDiv.textContent = "Réflexion en cours...";
   document.getElementById("chat").appendChild(loadingDiv);
 
+  // Prépare le contenu
+  let contentArray = [];
+  if (text) contentArray.push({ type: "text", text: text });
+
+  if (window.currentUploadedFile) {
+    const base64 = await fileToBase64(window.currentUploadedFile);
+    contentArray.push({
+      type: "image_url",
+      image_url: { url: `data:${window.currentUploadedFile.type};base64,${base64}` }
+    });
+    window.currentMode = "vision"; // Force le mode vision
+  }
+
+  box.value = "";
+  window.currentUploadedFile = null;
+
   try {
-    // Connexion à TON proxy Cloudflare
+    // Connexion au proxy Cloudflare
     const response = await fetch("https://ai-hub-proxy.pasquet-gregory.workers.dev", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "openrouter/free",
-        messages: [{ role: "user", content: text }]
+        mode: window.currentMode,
+        messages: [{ role: "user", content: contentArray.length === 1 && text ? text : contentArray }],
+        stream: true
       })
     });
 
-    const data = await response.json();
-    
-    // Affichage de la vraie réponse
-    loadingDiv.textContent = data.choices[0].message.content;
+    if (!response.ok) throw new Error("Erreur");
 
+    loadingDiv.textContent = ""; 
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = "";
+
+    // Lecture du flux (Streaming)
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split("\n").filter(l => l.trim() !== "");
+      
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          const data = line.slice(6);
+          if (data === "[DONE]") continue;
+          try {
+            const json = JSON.parse(data);
+            const delta = json.choices?.[0]?.delta?.content;
+            if (delta) {
+              fullText += delta;
+              loadingDiv.textContent = fullText;
+              document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+            }
+          } catch (e) {}
+        }
+      }
+    }
   } catch (error) {
     loadingDiv.textContent = "Oups, une erreur est survenue. Vérifie ta connexion ou tes clés API.";
   }
 }
 
 function showInfo(text) {
-alert(text);
+  alert(text);
 }
 
 </script>
 
 </body>
 </html>
-
