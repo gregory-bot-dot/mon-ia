@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>AI HUB</title>
 
+<!-- Mode application (écran d'accueil) -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#080d1b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AI HUB">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+
 <style>
 * { box-sizing: border-box; }
 html, body { height: 100%; }
@@ -17,6 +27,7 @@ body { margin: 0; background: #080d1b; color: #edf2ff; font-family: Arial, sans-
   background: #0b1222;
   border-right: 1px solid #25324c;
   padding: 15px;
+  padding-top: calc(15px + env(safe-area-inset-top, 0px));
   position: fixed;
   height: 100vh;
   height: 100dvh;
@@ -51,7 +62,9 @@ body { margin: 0; background: #080d1b; color: #edf2ff; font-family: Arial, sans-
 
 /* --- ZONE PRINCIPALE --- */
 .main {
-  flex: 1; padding: 15px; padding-bottom: calc(15px + env(safe-area-inset-bottom, 0px));
+  flex: 1; padding: 15px;
+  padding-top: calc(15px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(15px + env(safe-area-inset-bottom, 0px));
   display: flex; flex-direction: column; min-width: 0; width: 100%; min-height: 0;
 }
 .top-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; flex-shrink: 0; }
@@ -69,8 +82,26 @@ body { margin: 0; background: #080d1b; color: #edf2ff; font-family: Arial, sans-
 .chat { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; overflow-y: auto; margin-bottom: 15px; }
 .message { padding: 12px; border-radius: 12px; max-width: 90%; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; font-size: 15px; }
 .user { align-self: flex-end; background: #294d91; }
-.assistant { align-self: flex-start; background: #162139; border: 1px solid #293955; }
-.assistant.error { border-color: #7a3340; color: #ffb4bf; }
+.assistant { align-self: flex-start; background: #162139; border: 1px solid #293955; white-space: normal; }
+.assistant.error { border-color: #7a3340; color: #ffb4bf; white-space: pre-wrap; }
+
+/* Texte mis en forme (Markdown) */
+.content p { margin: 0 0 8px; }
+.content p:last-child { margin-bottom: 0; }
+.content h3, .content h4, .content h5 { margin: 12px 0 6px; line-height: 1.3; }
+.content h3 { font-size: 18px; }
+.content h4 { font-size: 16px; }
+.content h5 { font-size: 15px; }
+.content ul, .content ol { margin: 0 0 8px; padding-left: 22px; }
+.content li { margin-bottom: 3px; }
+.content pre { background: #0b1222; border: 1px solid #25324c; border-radius: 8px; padding: 10px; overflow-x: auto; margin: 8px 0; white-space: pre; }
+.content code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+.content :not(pre) > code { background: #0b1222; padding: 2px 5px; border-radius: 5px; }
+.content a { color: #7aa2ff; }
+
+.actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.action-btn { background: transparent; border: 1px solid #2c3b59; color: #9aaccb; border-radius: 14px; padding: 5px 11px; font-size: 12px; cursor: pointer; }
+.action-btn:active { background: #18243b; }
 
 /* --- SAISIE --- */
 .composer { padding: 12px; background: #17233d; border: 1px solid #344768; border-radius: 15px; flex-shrink: 0; }
@@ -106,10 +137,11 @@ textarea { width: 100%; min-height: 50px; max-height: 140px; resize: none; color
     <div class="top-bar">
       <button class="menu-btn" onclick="toggleSidebar()">☰</button>
       <div class="modes">
-        <button class="mode active" data-mode="auto" onclick="setMode('auto',this)">✨ Auto</button>
-        <button class="mode" data-mode="claude" onclick="setMode('claude',this)">✳ Claude</button>
-        <button class="mode" data-mode="gemini" onclick="setMode('gemini',this)">✦ Gemini</button>
-        <button class="mode" data-mode="deepseek" onclick="setMode('deepseek',this)">◈ DeepSeek</button>
+        <button class="mode" data-mode="auto" onclick="setMode('auto',this)">✨ Auto</button>
+        <button class="mode" data-mode="nemotron" onclick="setMode('nemotron',this)">🧠 Nemotron</button>
+        <button class="mode" data-mode="gemma" onclick="setMode('gemma',this)">✦ Gemma</button>
+        <button class="mode" data-mode="ernie" onclick="setMode('ernie',this)">⚡ ERNIE</button>
+        <button class="mode" data-mode="code" onclick="setMode('code',this)">⌘ Code</button>
         <button class="mode" data-mode="vision" onclick="setMode('vision',this)">👁️ Vision</button>
       </div>
     </div>
@@ -137,24 +169,113 @@ textarea { width: 100%; min-height: 50px; max-height: 140px; resize: none; color
 // RÉGLAGES
 // ==========================================
 const PROXY_URL = "https://ai-hub-proxy.pasquet-gregory.workers.dev";
+const VALID_MODES = ["auto", "nemotron", "gemma", "ernie", "code", "vision"];
 
 // ==========================================
-// DISCUSSIONS (SESSIONS)
+// ÉTAT
 // ==========================================
 let sessions = [];
 try { sessions = JSON.parse(localStorage.getItem('ai_hub_sessions')) || []; } catch (e) { sessions = []; }
 
 let currentSessionId = null;
 let currentMode = "auto";
+try {
+  const saved = localStorage.getItem('ai_hub_mode');
+  if (VALID_MODES.indexOf(saved) !== -1) currentMode = saved;
+} catch (e) {}
+
 let pendingImage = null;   // image choisie, pas encore envoyée
 let isSending = false;
+let lastRequest = null;    // dernier envoi (pour régénérer une réponse à une image)
 
 window.onload = function () {
+  const btn = document.querySelector('.mode[data-mode="' + currentMode + '"]');
+  if (btn) btn.classList.add("active");
+
   if (sessions.length > 0) loadSession(sessions[0].id);
   else newChat();
   renderSidebar();
 };
 
+// ==========================================
+// MISE EN FORME DES RÉPONSES (Markdown simple)
+// ==========================================
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function renderInline(s) {
+  const codes = [];
+  s = s.replace(/`([^`]+)`/g, function (m, c) { codes.push(c); return "\u0000" + (codes.length - 1) + "\u0000"; });
+  s = escapeHtml(s);
+  s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/(^|[^*])\*([^*\s][^*]*)\*(?!\*)/g, "$1<em>$2</em>");
+  s = s.replace(/\u0000(\d+)\u0000/g, function (m, i) { return "<code>" + escapeHtml(codes[i]) + "</code>"; });
+  return s;
+}
+
+function renderMarkdown(text) {
+  const lines = text.replace(/\r/g, "").split("\n");
+  let html = "";
+  let para = [];
+  let list = null;
+  let i = 0;
+
+  function flushPara() {
+    if (para.length) { html += "<p>" + para.map(renderInline).join("<br>") + "</p>"; para = []; }
+  }
+  function flushList() {
+    if (list) {
+      html += "<" + list.type + ">" + list.items.map(function (it) { return "<li>" + renderInline(it) + "</li>"; }).join("") + "</" + list.type + ">";
+      list = null;
+    }
+  }
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    if (/^\s*```/.test(line)) {            // bloc de code
+      flushPara(); flushList();
+      const code = [];
+      i++;
+      while (i < lines.length && !/^\s*```/.test(lines[i])) { code.push(lines[i]); i++; }
+      i++;                                  // ligne de fermeture (absente si la réponse est en cours)
+      html += "<pre><code>" + escapeHtml(code.join("\n")) + "</code></pre>";
+      continue;
+    }
+
+    const h = line.match(/^(#{1,4})\s+(.*)$/);
+    const ul = line.match(/^\s*[-*•]\s+(.*)$/);
+    const ol = line.match(/^\s*\d+[.)]\s+(.*)$/);
+
+    if (h) {
+      flushPara(); flushList();
+      const n = Math.min(h[1].length + 2, 5);
+      html += "<h" + n + ">" + renderInline(h[2]) + "</h" + n + ">";
+    } else if (ul) {
+      flushPara();
+      if (!list || list.type !== "ul") { flushList(); list = { type: "ul", items: [] }; }
+      list.items.push(ul[1]);
+    } else if (ol) {
+      flushPara();
+      if (!list || list.type !== "ol") { flushList(); list = { type: "ol", items: [] }; }
+      list.items.push(ol[1]);
+    } else if (line.trim() === "") {
+      flushPara(); flushList();
+    } else {
+      flushList();
+      para.push(line);
+    }
+    i++;
+  }
+  flushPara(); flushList();
+  return html;
+}
+
+// ==========================================
+// DISCUSSIONS (SESSIONS)
+// ==========================================
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('overlay').classList.toggle('active');
@@ -166,7 +287,7 @@ function closeSidebarOnMobile() {
 
 function newChat() {
   // Réutilise la discussion vide existante au lieu d'en créer une de plus
-  const empty = sessions.find(s => s.messages.length === 0);
+  const empty = sessions.find(function (s) { return s.messages.length === 0; });
   if (empty) {
     loadSession(empty.id);
   } else {
@@ -181,7 +302,7 @@ function newChat() {
 
 function loadSession(id) {
   currentSessionId = id;
-  const session = sessions.find(s => s.id === id);
+  const session = sessions.find(function (s) { return s.id === id; });
   if (!session) return;
 
   const chatDiv = document.getElementById("chat");
@@ -191,11 +312,15 @@ function loadSession(id) {
     document.getElementById("welcome").style.display = "block";
   } else {
     document.getElementById("welcome").style.display = "none";
-    session.messages.forEach(msg => {
-      if (msg.role === 'user' || msg.role === 'assistant') {
-        addMessageToUI(msg.content, msg.role);
+    session.messages.forEach(function (msg) {
+      if (msg.role === 'user') {
+        addMessageToUI(msg.content, "user");
+      } else if (msg.role === 'assistant') {
+        const div = addMessageToUI(msg.content, "assistant");
+        div._done = true;
       }
     });
+    refreshActions();
   }
   renderSidebar();
 }
@@ -203,7 +328,7 @@ function loadSession(id) {
 function deleteSession(id, event) {
   event.stopPropagation();
   if (confirm("Supprimer cette discussion ?")) {
-    sessions = sessions.filter(s => s.id !== id);
+    sessions = sessions.filter(function (s) { return s.id !== id; });
     saveSessions();
     if (currentSessionId === id) {
       if (sessions.length > 0) loadSession(sessions[0].id);
@@ -229,7 +354,7 @@ function saveSessions() {
 function renderSidebar() {
   const list = document.getElementById('sessionList');
   list.innerHTML = '';
-  sessions.forEach(session => {
+  sessions.forEach(function (session) {
     const btn = document.createElement('button');
     btn.className = 'session-item ' + (session.id === currentSessionId ? 'active' : '');
 
@@ -239,34 +364,103 @@ function renderSidebar() {
     const delBtn = document.createElement('button');
     delBtn.className = 'delete-btn';
     delBtn.textContent = '🗑️';
-    delBtn.onclick = (e) => deleteSession(session.id, e);
+    delBtn.onclick = function (e) { deleteSession(session.id, e); };
 
     btn.appendChild(titleSpan);
     btn.appendChild(delBtn);
-    btn.onclick = () => { loadSession(session.id); closeSidebarOnMobile(); };
+    btn.onclick = function () { loadSession(session.id); closeSidebarOnMobile(); };
     list.appendChild(btn);
   });
 }
 
 // ==========================================
-// CHAT ET IA
+// AFFICHAGE DES MESSAGES
 // ==========================================
 function setMode(m, button) {
   currentMode = m;
-  document.querySelectorAll(".mode").forEach(b => b.classList.remove("active"));
+  try { localStorage.setItem('ai_hub_mode', m); } catch (e) {}
+  document.querySelectorAll(".mode").forEach(function (b) { b.classList.remove("active"); });
   if (button) button.classList.add("active");
+}
+
+function setAssistantText(div, text, markdown) {
+  div._raw = text;
+  if (markdown) div._content.innerHTML = renderMarkdown(text);
+  else div._content.textContent = text;
 }
 
 function addMessageToUI(text, type) {
   const div = document.createElement("div");
   div.className = "message " + type;
-  div.textContent = text;
+  if (type.indexOf("assistant") !== -1) {
+    const content = document.createElement("div");
+    content.className = "content";
+    div.appendChild(content);
+    div._content = content;
+    setAssistantText(div, text, type.indexOf("error") === -1);
+  } else {
+    div.textContent = text;
+  }
   const chat = document.getElementById("chat");
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
   return div;
 }
 
+async function copyText(text, btn) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (e) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e2) {}
+    ta.remove();
+  }
+  const old = btn.textContent;
+  btn.textContent = "✓ Copié";
+  setTimeout(function () { btn.textContent = old; }, 1500);
+}
+
+// Boutons "Copier" sur chaque réponse, "Régénérer" sur la dernière
+function refreshActions() {
+  const chat = document.getElementById("chat");
+  const msgs = Array.prototype.slice.call(chat.querySelectorAll(".message.assistant"));
+
+  msgs.forEach(function (m) {
+    const old = m.querySelector(".actions");
+    if (old) old.remove();
+  });
+
+  msgs.forEach(function (m) {
+    if (!m._done || m.classList.contains("error")) return;
+
+    const bar = document.createElement("div");
+    bar.className = "actions";
+
+    const copy = document.createElement("button");
+    copy.className = "action-btn";
+    copy.textContent = "⧉ Copier";
+    copy.onclick = function () { copyText(m._raw, copy); };
+    bar.appendChild(copy);
+
+    if (!isSending && m === chat.lastElementChild) {
+      const regen = document.createElement("button");
+      regen.className = "action-btn";
+      regen.textContent = "↻ Régénérer";
+      regen.onclick = regenerate;
+      bar.appendChild(regen);
+    }
+    m.appendChild(bar);
+  });
+}
+
+// ==========================================
+// IMAGES
+// ==========================================
 function handleImageUpload(input) {
   if (input.files && input.files[0]) {
     pendingImage = input.files[0];
@@ -285,14 +479,17 @@ function clearPendingImage() {
 }
 
 function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
+  return new Promise(function (resolve, reject) {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result.split(",")[1]);
-    reader.onerror = error => reject(error);
+    reader.onload = function () { resolve(reader.result.split(",")[1]); };
+    reader.onerror = function (error) { reject(error); };
   });
 }
 
+// ==========================================
+// ENVOI AU PROXY
+// ==========================================
 async function sendMessage() {
   if (isSending) return;
 
@@ -300,12 +497,8 @@ async function sendMessage() {
   const text = box.value.trim();
   if (!text && !pendingImage) return;
 
-  const session = sessions.find(s => s.id === currentSessionId);
+  const session = sessions.find(function (s) { return s.id === currentSessionId; });
   if (!session) return;
-
-  isSending = true;
-  document.getElementById("sendBtn").disabled = true;
-  document.getElementById("welcome").style.display = "none";
 
   // Contenu envoyé à l'IA pour CE message (avec l'image si présente)
   let requestContent = text;
@@ -322,28 +515,64 @@ async function sendMessage() {
       requestMode = "vision";            // uniquement pour cet envoi
       storedText = "[Image] " + (text || "");
     } catch (e) {
+      document.getElementById("welcome").style.display = "none";
       addMessageToUI("Impossible de lire l'image.", "assistant error");
-      isSending = false;
-      document.getElementById("sendBtn").disabled = false;
       return;
     }
   }
 
+  document.getElementById("welcome").style.display = "none";
   addMessageToUI(storedText, "user");
+  lastRequest = { stored: storedText, content: requestContent, mode: requestMode };
+
+  box.value = "";
+  clearPendingImage();
+
+  await runChat(session, storedText, requestContent, requestMode);
+}
+
+async function regenerate() {
+  if (isSending) return;
+  const session = sessions.find(function (s) { return s.id === currentSessionId; });
+  if (!session) return;
+
+  const msgs = session.messages;
+  if (msgs.length < 2 || msgs[msgs.length - 1].role !== "assistant" || msgs[msgs.length - 2].role !== "user") return;
+
+  msgs.pop();                            // ancienne réponse
+  const userMsg = msgs.pop();            // la question, renvoyée ci-dessous
+
+  const chat = document.getElementById("chat");
+  if (chat.lastElementChild) chat.lastElementChild.remove();
+  if (chat.lastElementChild) chat.lastElementChild.remove();
+  addMessageToUI(userMsg.content, "user");
+
+  // Le mode choisi maintenant s'applique : changer de mode puis régénérer donne une autre réponse
+  let content = userMsg.content;
+  let mode = currentMode;
+  if (lastRequest && lastRequest.stored === userMsg.content && Array.isArray(lastRequest.content)) {
+    content = lastRequest.content;
+    mode = lastRequest.mode;
+  }
+
+  await runChat(session, userMsg.content, content, mode);
+}
+
+async function runChat(session, storedText, requestContent, requestMode) {
+  isSending = true;
+  document.getElementById("sendBtn").disabled = true;
+  refreshActions();
 
   // L'historique sauvegardé ne garde que du texte (une image en base64 remplit le stockage)
   const history = session.messages.slice();
   session.messages.push({ role: "user", content: storedText });
 
   if (session.messages.length === 1) {
-    const t = (text || "Image").trim();
+    const t = (storedText || "Image").trim();
     session.title = t.substring(0, 30) + (t.length > 30 ? "..." : "");
     renderSidebar();
   }
   saveSessions();
-
-  box.value = "";
-  clearPendingImage();
 
   const loadingDiv = addMessageToUI("Réflexion...", "assistant");
   const messagesToSend = history.concat([{ role: "user", content: requestContent }]);
@@ -357,10 +586,11 @@ async function sendMessage() {
 
     if (!response.ok) {
       const err = await response.text();
-      throw new Error("HTTP " + response.status + " : " + err.slice(0, 200));
+      let msg = err.slice(0, 200);
+      try { msg = JSON.parse(err).error.message || msg; } catch (e) {}
+      throw new Error("HTTP " + response.status + " : " + msg);
     }
 
-    loadingDiv.textContent = "";
     const chat = document.getElementById("chat");
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -368,76 +598,69 @@ async function sendMessage() {
     let raw = "";
     let buffer = "";
 
+    function handleLine(line) {
+      const l = line.trim();
+      if (!l.startsWith("data:")) return;
+      const data = l.slice(5).trim();
+      if (data === "[DONE]") return;
+      try {
+        const json = JSON.parse(data);
+        const delta = json.choices && json.choices[0] && json.choices[0].delta && json.choices[0].delta.content;
+        if (delta) {
+          fullText += delta;
+          setAssistantText(loadingDiv, fullText, true);
+          chat.scrollTop = chat.scrollHeight;
+        }
+      } catch (e) {}
+    }
+
     while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
+      const result = await reader.read();
+      if (result.done) break;
+      const chunk = decoder.decode(result.value, { stream: true });
       raw += chunk;
       buffer += chunk;
 
       const lines = buffer.split("\n");
-      buffer = lines.pop();            // garde la ligne incomplète pour le tour suivant
-
-      for (const line of lines) {
-        const l = line.trim();
-        if (!l.startsWith("data:")) continue;
-        const data = l.slice(5).trim();
-        if (data === "[DONE]") continue;
-        try {
-          const json = JSON.parse(data);
-          const delta = json.choices?.[0]?.delta?.content;
-          if (delta) {
-            fullText += delta;
-            loadingDiv.textContent = fullText;
-            chat.scrollTop = chat.scrollHeight;
-          }
-        } catch (e) {}
-      }
+      buffer = lines.pop();              // garde la ligne incomplète pour le tour suivant
+      lines.forEach(handleLine);
     }
-
-    // Dernière ligne restée dans le tampon
-    const last = buffer.trim();
-    if (last.startsWith("data:")) {
-      try {
-        const json = JSON.parse(last.slice(5).trim());
-        const delta = json.choices?.[0]?.delta?.content;
-        if (delta) { fullText += delta; loadingDiv.textContent = fullText; }
-      } catch (e) {}
-    }
+    handleLine(buffer);                  // dernière ligne restée dans le tampon
 
     // Repli : réponse non streamée (JSON classique)
     if (!fullText) {
       try {
         const json = JSON.parse(raw);
-        fullText = json.choices?.[0]?.message?.content
-          || json.error?.message
+        fullText = (json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content)
+          || (json.error && json.error.message)
           || (typeof json.error === "string" ? json.error : "")
-          || json.content?.[0]?.text
           || "";
       } catch (e) {}
-      if (fullText) loadingDiv.textContent = fullText;
+      if (fullText) setAssistantText(loadingDiv, fullText, true);
     }
 
     // Toujours vide : on montre ce que le proxy a renvoyé
     if (!fullText) {
       loadingDiv.className = "message assistant error";
-      loadingDiv.textContent = "Réponse vide du proxy :\n" + (raw.slice(0, 300) || "(rien reçu)");
-      session.messages.pop();          // retire la question pour ne pas polluer l'historique
+      setAssistantText(loadingDiv, "Réponse vide du proxy :\n" + (raw.slice(0, 300) || "(rien reçu)"), false);
+      session.messages.pop();            // retire la question pour ne pas polluer l'historique
       saveSessions();
       return;
     }
 
     session.messages.push({ role: "assistant", content: fullText });
     saveSessions();
+    loadingDiv._done = true;
 
   } catch (error) {
     loadingDiv.className = "message assistant error";
-    loadingDiv.textContent = "Erreur : " + error.message;
-    session.messages.pop();            // la question n'a pas reçu de réponse
+    setAssistantText(loadingDiv, "Erreur : " + error.message, false);
+    session.messages.pop();              // la question n'a pas reçu de réponse
     saveSessions();
   } finally {
     isSending = false;
     document.getElementById("sendBtn").disabled = false;
+    refreshActions();
   }
 }
 </script>
