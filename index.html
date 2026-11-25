@@ -787,10 +787,9 @@ async function runChat(session, storedText, requestContent, requestMode) {
 }
 
 // ==========================================
-// INITIALIZATION (CORRIGÉE)
+// INITIALIZATION
 // ==========================================
-window.onload = function () {
-  function initializeApp() {
+function initializeApp() {
   const btn = document.querySelector('.mode[data-mode="' + currentMode + '"]');
   if (btn) btn.classList.add("active");
 
