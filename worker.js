@@ -222,37 +222,43 @@ export default {
       return json({ error: "Aucun message reçu." }, 400, cors);
     }
 
+    
     const recent = body.messages
-  .filter(m =>
-    m &&
-    ["user", "assistant"].includes(m.role) &&
-    (
-      typeof m.content === "string" ||
-      (
-        Array.isArray(m.content) &&
-        m.content.length > 0 &&
-        m.content.every(part =>
-          part &&
+      .filter(m =>
+        m &&
+        ["user", "assistant"].includes(m.role) &&
+        (
+          typeof m.content === "string" ||
           (
-            (part.type === "text" && typeof part.text === "string") ||
-            (
-              part.type === "image_url" &&
-              part.image_url &&
-              typeof part.image_url.url === "string" &&
-              part.image_url.url.startsWith("data:image/")
+            Array.isArray(m.content) &&
+            m.content.length > 0 &&
+            m.content.every(part =>
+              part &&
+              (
+                (part.type === "text" && typeof part.text === "string") ||
+                (
+                  part.type === "image_url" &&
+                  part.image_url &&
+                  typeof part.image_url.url === "string" &&
+                  part.image_url.url.startsWith("data:image/")
+                )
+              )
             )
           )
         )
       )
-    )
-  )
-  .slice(-MAX_MESSAGES);
+      .slice(-MAX_MESSAGES);
 
-if (recent.length === 0) {
-  return json({ error: "Messages invalides." }, 400, cors);
-}
+    if (recent.length === 0) {
       return json({ error: "Messages invalides." }, 400, cors);
     }
+
+    const messages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...recent
+    ];
+
+      
 
     const messages = [
       { role: "system", content: SYSTEM_PROMPT },
