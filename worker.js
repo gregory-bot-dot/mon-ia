@@ -12,7 +12,7 @@ const SYSTEM_PROMPT =
   "Si tu ne sais pas, dis-le au lieu d'inventer.";
 
 const MAX_MESSAGES = 20;
-const MAX_BODY_SIZE = 1_000_000;
+const MAX_BODY_SIZE = 8_000_000;
 
 const MODELS = {
   auto: ["openrouter/free"],
@@ -223,14 +223,34 @@ export default {
     }
 
     const recent = body.messages
-      .filter(m =>
-        m &&
-        ["user", "assistant"].includes(m.role) &&
-        typeof m.content === "string"
+  .filter(m =>
+    m &&
+    ["user", "assistant"].includes(m.role) &&
+    (
+      typeof m.content === "string" ||
+      (
+        Array.isArray(m.content) &&
+        m.content.length > 0 &&
+        m.content.every(part =>
+          part &&
+          (
+            (part.type === "text" && typeof part.text === "string") ||
+            (
+              part.type === "image_url" &&
+              part.image_url &&
+              typeof part.image_url.url === "string" &&
+              part.image_url.url.startsWith("data:image/")
+            )
+          )
+        )
       )
-      .slice(-MAX_MESSAGES);
+    )
+  )
+  .slice(-MAX_MESSAGES);
 
-    if (recent.length === 0) {
+if (recent.length === 0) {
+  return json({ error: "Messages invalides." }, 400, cors);
+}
       return json({ error: "Messages invalides." }, 400, cors);
     }
 
