@@ -246,27 +246,27 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
 
   const button = document.getElementById("loginButton");
   const error = document.getElementById("authError");
+
   button.disabled = true;
   button.textContent = "Connexion...";
   error.textContent = "";
 
   try {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
-  await auth.signInWithEmailAndPassword(email, password);
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
 
-} catch (err) {
-  console.error("Erreur Firebase :", err);
-  error.textContent = "Erreur Firebase : " + err.code + " — " + err.message;
+    await auth.signInWithEmailAndPassword(email, password);
 
-} finally {
-  button.disabled = false;
-  button.textContent = "Se connecter";
-}
+  } catch (err) {
+    console.error("Erreur Firebase :", err);
+    error.textContent = "Erreur Firebase : " + err.code + " — " + err.message;
+
+  } finally {
     button.disabled = false;
     button.textContent = "Se connecter";
   }
 });
+
 
 auth.onAuthStateChanged(function(user) {
   if (user) {
