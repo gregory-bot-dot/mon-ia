@@ -75,6 +75,65 @@ textarea { width: 100%; min-height: 50px; max-height: 140px; resize: none; color
   .menu-btn, .close-btn { display: none; }
   .overlay { display: none !important; }
 }
+
+/* Connexion sécurisée AI HUB */
+.app {
+  display: none;
+}
+body.authenticated .app {
+  display: flex;
+}
+.auth-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #080d1b;
+}
+.auth-card {
+  width: 100%;
+  max-width: 390px;
+  padding: 28px;
+  border: 1px solid #293955;
+  border-radius: 20px;
+  background: #111c31;
+  text-align: center;
+}
+.auth-card h2 {
+  margin-top: 0;
+  font-size: 25px;
+}
+.auth-card p {
+  color: #9aaccb;
+  font-size: 14px;
+}
+.auth-card input {
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0;
+  border: 1px solid #344768;
+  border-radius: 10px;
+  background: #080d1b;
+  color: white;
+  font-size: 16px;
+}
+.auth-card button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #744df2, #2481ff);
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+}
+#authError {
+  color: #ff8e9b;
+  min-height: 20px;
+}
+
 </style>
 <link rel="stylesheet" href="design-v2.css">
 </head>
