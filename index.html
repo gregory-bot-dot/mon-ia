@@ -251,15 +251,18 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
   error.textContent = "";
 
   try {
-    const email = document.getElementById("loginEmail").value.trim();
-    const password = document.getElementById("loginPassword").value;
-    await auth.signInWithEmailAndPassword(email, password);
-  } catch (err) {
-    } catch (err) {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  await auth.signInWithEmailAndPassword(email, password);
+
+} catch (err) {
   console.error("Erreur Firebase :", err);
   error.textContent = "Erreur Firebase : " + err.code + " — " + err.message;
+
+} finally {
+  button.disabled = false;
+  button.textContent = "Se connecter";
 }
-  } finally {
     button.disabled = false;
     button.textContent = "Se connecter";
   }
