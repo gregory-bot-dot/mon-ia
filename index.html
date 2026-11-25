@@ -218,6 +218,59 @@ body.authenticated #authScreen {
 const PROXY_URL = "https://ai-hub-proxy.pasquet-gregory.workers.dev";
 const STORYLAB_URL = "https://gregory-bot-dot.github.io/mon-site/";
 
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDd5CsFCajDxssanpk1wwESGNi6op32I9U",
+  authDomain: "ai-hub-security-5c5a2.firebaseapp.com",
+  projectId: "ai-hub-security-5c5a2",
+  storageBucket: "ai-hub-security-5c5a2.firebasestorage.app",
+  messagingSenderId: "1009066593944",
+  appId: "1:1009066593944:web:01df0dd204fe5a2c0acaed"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+async function getAuthHeaders() {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Tu dois être connecté.");
+  const token = await user.getIdToken();
+  return {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + token
+  };
+}
+
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const button = document.getElementById("loginButton");
+  const error = document.getElementById("authError");
+  button.disabled = true;
+  button.textContent = "Connexion...";
+  error.textContent = "";
+
+  try {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch (err) {
+    error.textContent = "Connexion impossible : vérifie ton e-mail et ton mot de passe.";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Se connecter";
+  }
+});
+
+auth.onAuthStateChanged(function(user) {
+  if (user) {
+    document.body.classList.add("authenticated");
+    initializeApp();
+  } else {
+    document.body.classList.remove("authenticated");
+  }
+});
+
 function openStoryLab() {
   if (!STORYLAB_URL) {
     alert("Adresse de StoryLab non renseignée.");
