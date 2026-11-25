@@ -300,7 +300,7 @@ async function backupSessions() {
     const data = JSON.stringify(sessions);
     const response = await fetch(PROXY_URL + '/backup', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await getAuthHeaders(),
       body: JSON.stringify({ data })
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -312,7 +312,10 @@ async function backupSessions() {
 
 async function restoreSessions() {
   try {
-    const response = await fetch(PROXY_URL + '/backup', { method: 'GET' });
+    const response = await fetch(PROXY_URL + '/backup', {
+  method: 'GET',
+  headers: await getAuthHeaders()
+});
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const json = await response.json();
     
@@ -700,7 +703,7 @@ async function runChat(session, storedText, requestContent, requestMode) {
   try {
     const response = await fetch(PROXY_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: await getAuthHeaders(),
       body: JSON.stringify({ mode: requestMode, messages: messagesToSend, stream: true })
     });
 
