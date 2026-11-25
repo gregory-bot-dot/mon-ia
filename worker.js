@@ -260,11 +260,6 @@ export default {
 
       
 
-    const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
-      ...recent
-    ];
-
     const mode = MODELS[body.mode] ? body.mode : "auto";
     const stream = body.stream !== false;
 
