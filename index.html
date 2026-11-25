@@ -138,6 +138,21 @@ body.authenticated .app {
 <link rel="stylesheet" href="design-v2.css">
 </head>
 <body>
+  
+
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <h2>🧠 AI HUB</h2>
+    <p>Connecte-toi pour accéder à ton assistant personnel.</p>
+    <form id="loginForm">
+      <input id="loginEmail" type="email" placeholder="Adresse e-mail" autocomplete="username" required>
+      <input id="loginPassword" type="password" placeholder="Mot de passe" autocomplete="current-password" required>
+      <button type="submit" id="loginButton">Se connecter</button>
+    </form>
+    <p id="authError"></p>
+  </div>
+</div>
+
 
 <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
