@@ -787,14 +787,16 @@ async function runChat(session, storedText, requestContent, requestMode) {
 // INITIALIZATION (CORRIGÉE)
 // ==========================================
 window.onload = function () {
+  function initializeApp() {
   const btn = document.querySelector('.mode[data-mode="' + currentMode + '"]');
   if (btn) btn.classList.add("active");
 
-  // On charge uniquement depuis le stockage local du téléphone pour éviter l'erreur HTTP
   if (sessions.length > 0) {
     loadSession(sessions[0].id);
   } else {
     newChat();
+  }
+}
   }
 };
 </script>
