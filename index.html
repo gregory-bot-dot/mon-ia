@@ -194,10 +194,44 @@ body.authenticated #authScreen {
       </div>
     </div>
 
-    <section class="welcome" id="welcome">
-      <h2>Bienvenue sur AI HUB ! 👋</h2>
-      <p>Pose ta question, explore les possibilités et laisse la magie de l'IA opérer...</p>
-    </section>
+    
+<section class="welcome" id="welcome">
+  <h2>Bienvenue sur AI HUB ! 👋</h2>
+  <p>Ton espace intelligent pour réfléchir, créer, développer et explorer de nouvelles possibilités.</p>
+
+  <div class="welcome-actions">
+
+    <button type="button" class="welcome-card"
+      onclick="useWelcomeAction('auto','',false)">
+      <span class="welcome-icon">✦</span>
+      <span class="welcome-card-title">Discuter avec l'IA</span>
+      <span class="welcome-card-desc">Poser une question et obtenir de l'aide</span>
+    </button>
+
+    <button type="button" class="welcome-card"
+      onclick="useWelcomeAction('code','Aide-moi à créer ou corriger du code : ',false)">
+      <span class="welcome-icon">⌘</span>
+      <span class="welcome-card-title">Développer</span>
+      <span class="welcome-card-desc">Créer, comprendre ou corriger du code</span>
+    </button>
+
+    <button type="button" class="welcome-card"
+      onclick="useWelcomeAction('auto','Aide-moi à trouver des idées sur le sujet suivant : ',false)">
+      <span class="welcome-icon">💡</span>
+      <span class="welcome-card-title">Trouver des idées</span>
+      <span class="welcome-card-desc">Imaginer, organiser et créer</span>
+    </button>
+
+    <button type="button" class="welcome-card"
+      onclick="useWelcomeAction('vision','Analyse cette image et explique-moi ce qu’elle contient.',true)">
+      <span class="welcome-icon">▧</span>
+      <span class="welcome-card-title">Analyser une image</span>
+      <span class="welcome-card-desc">Comprendre et interpréter une image</span>
+    </button>
+
+  </div>
+</section>
+
 
     <div class="chat" id="chat"></div>
 
