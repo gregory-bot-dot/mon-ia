@@ -701,6 +701,30 @@ function setMode(m, button) {
   if (button) button.classList.add("active");
 }
 
+
+function useWelcomeAction(mode, starterText, openImage) {
+  const modeButton = document.querySelector(
+    '.mode[data-mode="' + mode + '"]'
+  );
+
+  if (modeButton) {
+    setMode(mode, modeButton);
+  }
+
+  const promptBox = document.getElementById("prompt");
+
+  if (starterText) {
+    promptBox.value = starterText;
+  }
+
+  if (openImage) {
+    document.getElementById("fileInput").click();
+    return;
+  }
+
+  promptBox.focus();
+}
+
 function setAssistantText(div, text, markdown) {
   div._raw = text;
 
