@@ -1141,3 +1141,53 @@ button:focus-visible, textarea:focus-visible {
   }
 }
 
+/* =====================================
+   AI HUB — BLOCS DE CODE PREMIUM
+   ===================================== */
+
+.message .content pre {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  margin: 16px 0;
+  padding: 17px;
+  overflow-x: auto;
+  overflow-y: auto;
+  border-radius: 15px;
+  border: 1px solid rgba(145, 130, 255, .22);
+  background: linear-gradient(
+    145deg,
+    #0b1020,
+    #101729
+  );
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #6255a8 #101729;
+}
+
+.message .content pre code {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+  color: #dce6ff;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.75;
+  white-space: pre;
+  tab-size: 2;
+}
+
+@media(max-width: 767px) {
+  .message .content pre {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .message .content pre code {
+    font-size: 11px;
+    line-height: 1.7;
+  }
+}
+
