@@ -456,6 +456,7 @@ function renderInline(s) {
   return s;
 }
 
+
 function renderMarkdown(text) {
   const lines = text.replace(/\r/g, "").split("\n");
   let html = "";
@@ -481,9 +482,71 @@ function renderMarkdown(text) {
     }
   }
 
+  function splitTableRow(line) {
+    return line.trim()
+      .replace(/^\|/, "")
+      .replace(/\|$/, "")
+      .split("|")
+      .map(function (cell) {
+        return cell.trim();
+      });
+  }
+
+  function isTableSeparator(line) {
+    const cells = splitTableRow(line);
+    return cells.length > 1 && cells.every(function (cell) {
+      return /^:?-{3,}:?$/.test(cell);
+    });
+  }
+
   while (i < lines.length) {
     const line = lines[i];
 
+    // TABLEAUX MARKDOWN
+    if (
+      line.includes("|") &&
+      i + 1 < lines.length &&
+      isTableSeparator(lines[i + 1])
+    ) {
+      flushPara();
+      flushList();
+
+      const headers = splitTableRow(line);
+      i += 2;
+
+      html += "<div class=\"markdown-table-wrap\"><table>";
+      html += "<thead><tr>";
+
+      headers.forEach(function (cell) {
+        html += "<th>" + renderInline(cell) + "</th>";
+      });
+
+      html += "</tr></thead><tbody>";
+
+      while (
+        i < lines.length &&
+        lines[i].includes("|") &&
+        lines[i].trim() !== ""
+      ) {
+        const cells = splitTableRow(lines[i]);
+
+        html += "<tr>";
+
+        headers.forEach(function (_, index) {
+          html += "<td>" +
+            renderInline(cells[index] || "") +
+            "</td>";
+        });
+
+        html += "</tr>";
+        i++;
+      }
+
+      html += "</tbody></table></div>";
+      continue;
+    }
+
+    // BLOCS DE CODE
     if (/^\s*```/.test(line)) {
       flushPara();
       flushList();
@@ -508,8 +571,11 @@ function renderMarkdown(text) {
     if (h) {
       flushPara();
       flushList();
+
       const n = Math.min(h[1].length + 2, 5);
-      html += "<h" + n + ">" + renderInline(h[2]) + "</h" + n + ">";
+      html += "<h" + n + ">" +
+        renderInline(h[2]) +
+        "</h" + n + ">";
 
     } else if (ul) {
       flushPara();
@@ -548,6 +614,8 @@ function renderMarkdown(text) {
 
   return html;
 }
+
+
 
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
