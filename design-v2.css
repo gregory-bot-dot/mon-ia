@@ -1191,3 +1191,54 @@ button:focus-visible, textarea:focus-visible {
   }
 }
 
+/* =====================================
+   AI HUB — FINITION DU CHAMP DE SAISIE
+   ===================================== */
+
+.main .composer {
+  transition: border-color .25s ease, box-shadow .25s ease;
+}
+
+.main .composer:focus-within {
+  border-color: rgba(145, 119, 255, .58);
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, .24),
+    0 0 0 3px rgba(125, 100, 255, .09),
+    0 0 28px rgba(116, 94, 255, .12);
+}
+
+.composer #prompt {
+  color: #f4f5ff;
+  caret-color: #a994ff;
+  outline: none;
+}
+
+.composer #prompt::placeholder {
+  color: #8994b0;
+  opacity: 1;
+}
+
+.composer .send {
+  background: linear-gradient(135deg, #8060e8, #397fc5);
+  color: #ffffff;
+  border: 1px solid rgba(190, 177, 255, .35);
+  box-shadow: 0 5px 18px rgba(103, 91, 225, .25);
+}
+
+.composer .send:hover {
+  filter: brightness(1.12);
+}
+
+.composer .send:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  filter: grayscale(.3);
+  box-shadow: none;
+}
+
+@media(max-width: 767px) {
+  .main .composer:focus-within {
+    border-color: rgba(145, 119, 255, .65);
+  }
+}
+
