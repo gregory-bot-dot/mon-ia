@@ -220,7 +220,37 @@ const STORYLAB_URL = "https://gregory-bot-dot.github.io/mon-site/";
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDd5CsFCajDxssanpk1wwESGNi6op32I9U",
+  apiKey: Installation et configuration du SDK
+
+
+npm
+
+CDN
+
+Configuration
+Si vous utilisez déjà npm et un bundler de module comme webpack ou Rollup, vous pouvez exécuter la commande suivante pour installer la dernière version du SDK (en savoir plus) :
+
+npm install firebase
+Ensuite, initialisez Firebase et commencez à exploiter les SDK pour les produits que vous souhaitez utiliser.
+
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey:"AIzaSyBoQx6QYbwOY6flVMEdPx4fp_7hWb40NDg",
+  authDomain: "ai-hub-security-5c5a2.firebaseapp.com",
+  projectId: "ai-hub-security-5c5a2",
+  storageBucket: "ai-hub-security-5c5a2.firebasestorage.app",
+  messagingSenderId: "1009066593944",
+  appId: "1:1009066593944:web:01df0dd204fe5a2c0acaed"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+Remarque : Cette option utilise le SDK JavaScript modulaire, qui réduit la taille du SDK",
   authDomain: "ai-hub-security-5c5a2.firebaseapp.com",
   projectId: "ai-hub-security-5c5a2",
   storageBucket: "ai-hub-security-5c5a2.firebasestorage.app",
