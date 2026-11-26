@@ -169,6 +169,7 @@ body.authenticated #authScreen {
 
     <button class="new-chat" onclick="newChat()">＋ Nouvelle discussion</button>
     <button class="link-btn" onclick="openStoryLab()">🎬 StoryLab &amp; Avatar Lab</button>
+    <button class="link-btn" onclick="openProjects()">📁 Mes projets</button>
     <div class="session-list" id="sessionList"></div>
 
     <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #25324c;">
@@ -231,7 +232,22 @@ body.authenticated #authScreen {
 
   </div>
 </section>
+<section id="projectsView" class="projects-view" style="display:none;">
+  <div class="projects-header">
+    <div>
+      <h2>📁 Mes projets</h2>
+      <p>Retrouve et organise tous tes projets au même endroit.</p>
+    </div>
+    <button onclick="closeProjects()">← Retour</button>
+  </div>
 
+  <div class="projects-toolbar">
+    <h3>Mes espaces de travail</h3>
+    <button onclick="createProject()">＋ Nouveau projet</button>
+  </div>
+
+  <div id="projectsList" class="projects-list"></div>
+</section>
 
     <div class="chat" id="chat"></div>
 
@@ -328,7 +344,13 @@ try {
 } catch (e) {
   sessions = [];
 }
+let projects = [];
 
+try {
+  projects = JSON.parse(localStorage.getItem("ai_hub_projects")) || [];
+} catch (e) {
+  projects = [];
+}
 let currentSessionId = null;
 let currentMode = "auto";
 
@@ -754,7 +776,117 @@ function renderSidebar() {
     list.appendChild(btn);
   });
 }
+function openProjects() {
+  document.getElementById("welcome").style.display = "none";
+  document.getElementById("chat").style.display = "none";
+  document.querySelector(".composer").style.display = "none";
+  document.querySelector(".modes").style.display = "none";
 
+  document.getElementById("projectsView").style.display = "block";
+
+  renderProjects();
+  closeSidebarOnMobile();
+}
+
+function closeProjects() {
+  document.getElementById("projectsView").style.display = "none";
+
+  if (currentSessionId) {
+    loadSession(currentSessionId);
+  }
+
+  document.getElementById("chat").style.display = "";
+  document.querySelector(".composer").style.display = "";
+  document.querySelector(".modes").style.display = "";
+}
+
+function createProject() {
+  const name = prompt("Nom du projet :");
+  if (!name || !name.trim()) return;
+
+  const description = prompt("Description du projet :") || "";
+
+  projects.unshift({
+    id: Date.now().toString(),
+    name: name.trim(),
+    description: description.trim(),
+    createdAt: new Date().toISOString()
+  });
+
+  saveProjects();
+  renderProjects();
+}
+
+function saveProjects() {
+  localStorage.setItem(
+    "ai_hub_projects",
+    JSON.stringify(projects)
+  );
+}
+
+function renderProjects() {
+  const list = document.getElementById("projectsList");
+  list.innerHTML = "";
+
+  if (!projects.length) {
+    list.innerHTML =
+      '<p class="projects-empty">Aucun projet pour le moment. Crée ton premier projet !</p>';
+    return;
+  }
+
+  projects.forEach(function(project) {
+    const card = document.createElement("article");
+    card.className = "project-card";
+
+    const title = document.createElement("h3");
+    title.textContent = "📁 " + project.name;
+
+    const description = document.createElement("p");
+    description.textContent =
+      project.description || "Aucune description pour le moment.";
+
+    const date = document.createElement("small");
+    date.textContent = new Date(project.createdAt).toLocaleDateString("fr-FR");
+
+    const actions = document.createElement("div");
+    actions.className = "project-actions";
+
+    const discuss = document.createElement("button");
+    discuss.textContent = "Travailler avec l'IA";
+    discuss.onclick = function() {
+      closeProjects();
+      newChat();
+      document.getElementById("prompt").value =
+        "Je souhaite travailler sur le projet « " +
+        project.name + " ». " + project.description +
+        "\n\nAide-moi à avancer sur ce projet.";
+      document.getElementById("prompt").focus();
+    };
+
+    const remove = document.createElement("button");
+    remove.textContent = "Supprimer";
+    remove.onclick = function() {
+      if (!confirm("Supprimer ce projet ?")) return;
+
+      projects = projects.filter(function(p) {
+        return p.id !== project.id;
+      });
+
+      saveProjects();
+      renderProjects();
+    };
+
+    actions.appendChild(discuss);
+    actions.appendChild(remove);
+
+    card.appendChild(title);
+    card.appendChild(description);
+    card.appendChild(date);
+    card.appendChild(actions);
+
+    list.appendChild(card);
+  });
+}
 function setMode(m, button) {
   currentMode = m;
 
