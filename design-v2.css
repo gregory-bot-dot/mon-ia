@@ -1096,3 +1096,48 @@ button:focus-visible, textarea:focus-visible {
   }
 }
 
+/* =====================================
+   AI HUB — FINITION DES TABLEAUX
+   ===================================== */
+
+.message .content .markdown-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  margin: 16px 0;
+  overflow-x: auto;
+  border: 1px solid rgba(155, 165, 215, .18);
+  border-radius: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.message .content .markdown-table-wrap table {
+  display: table;
+  width: max-content;
+  min-width: 100%;
+  max-width: none;
+  margin: 0;
+  border-collapse: collapse;
+}
+
+.message .content .markdown-table-wrap th,
+.message .content .markdown-table-wrap td {
+  min-width: 100px;
+  padding: 11px 13px;
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.message .content .markdown-table-wrap th {
+  background: rgba(132, 110, 255, .15);
+  font-weight: 700;
+}
+
+@media(max-width: 767px) {
+  .message .content .markdown-table-wrap th,
+  .message .content .markdown-table-wrap td {
+    min-width: 115px;
+    padding: 10px;
+    font-size: 12px;
+  }
+}
+
