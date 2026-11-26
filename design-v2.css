@@ -422,3 +422,83 @@ button:focus-visible, textarea:focus-visible {
     font-size: 14px;
   }
 }
+
+/* =====================================
+   AI HUB — RACCOURCIS DE L'ACCUEIL
+   ===================================== */
+
+.welcome-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+  max-width: 620px;
+  margin: 32px auto 0;
+}
+
+.welcome-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+  min-width: 0;
+  padding: 19px;
+  text-align: left;
+  color: var(--hub-text);
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(164,178,220,.14);
+  border-radius: 17px;
+  cursor: pointer;
+}
+
+.welcome-card:hover {
+  background: rgba(130,105,255,.10);
+  border-color: rgba(151,130,255,.45);
+  transform: translateY(-2px);
+  box-shadow: 0 9px 25px rgba(0,0,0,.15);
+}
+
+.welcome-icon {
+  display: grid;
+  place-items: center;
+  width: 37px;
+  height: 37px;
+  border-radius: 11px;
+  color: #c4b5ff;
+  font-size: 21px;
+  background: linear-gradient(
+    135deg,
+    rgba(146,112,255,.22),
+    rgba(78,156,255,.15)
+  );
+}
+
+.welcome-card-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.welcome-card-desc {
+  color: var(--hub-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media(max-width: 420px) {
+  .welcome-actions {
+    gap: 9px;
+    margin-top: 25px;
+  }
+
+  .welcome-card {
+    padding: 14px 12px;
+    border-radius: 14px;
+  }
+
+  .welcome-card-title {
+    font-size: 13px;
+  }
+
+  .welcome-card-desc {
+    font-size: 11px;
+  }
+}
