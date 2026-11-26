@@ -1368,3 +1368,65 @@ button:focus-visible, textarea:focus-visible {
   }
 }
 
+/* =====================================
+   AI HUB — CENTRE D'OUTILS
+   ===================================== */
+
+.composer .tools {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(155, 165, 215, .12);
+}
+
+.composer .tools::before {
+  content: "OUTILS";
+  color: #818ba9;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 1.3px;
+  margin-right: auto;
+}
+
+.composer #imageBtn {
+  min-width: 104px;
+  min-height: 42px;
+  border: 1px solid rgba(145, 119, 255, .25);
+  background: linear-gradient(
+    135deg,
+    rgba(132, 110, 255, .13),
+    rgba(65, 130, 230, .08)
+  );
+  color: #d9d0ff;
+  font-weight: 600;
+  transition:
+    background .2s ease,
+    border-color .2s ease,
+    transform .2s ease,
+    box-shadow .2s ease;
+}
+
+.composer #imageBtn:hover {
+  background: rgba(132, 110, 255, .20);
+  border-color: rgba(165, 145, 255, .55);
+  box-shadow: 0 5px 18px rgba(112, 83, 255, .12);
+}
+
+.composer #imageBtn:active {
+  transform: scale(.96);
+}
+
+@media(max-width: 767px) {
+  .composer .tools {
+    padding-top: 10px;
+    gap: 8px;
+  }
+
+  .composer .tools::before {
+    font-size: 9px;
+  }
+}
+
