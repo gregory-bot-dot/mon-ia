@@ -1242,3 +1242,50 @@ button:focus-visible, textarea:focus-visible {
   }
 }
 
+/* =====================================
+   AI HUB — FINITION BARRE DES MODÈLES
+   ===================================== */
+
+.main .modes {
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  padding: 7px 4px 11px;
+}
+
+.main .mode {
+  scroll-snap-align: start;
+  position: relative;
+  isolation: isolate;
+  transition:
+    background .22s ease,
+    border-color .22s ease,
+    box-shadow .22s ease,
+    transform .22s ease;
+}
+
+.main .mode.active {
+  border-color: rgba(195, 179, 255, .65);
+  box-shadow:
+    0 5px 18px rgba(103, 91, 225, .25),
+    inset 0 0 12px rgba(255, 255, 255, .06);
+}
+
+.main .mode:focus-visible {
+  outline: 2px solid #a994ff;
+  outline-offset: 3px;
+}
+
+@media(max-width: 767px) {
+  .main .modes {
+    scroll-padding-left: 4px;
+    scroll-padding-right: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .main .mode {
+    min-height: 39px;
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+}
+
