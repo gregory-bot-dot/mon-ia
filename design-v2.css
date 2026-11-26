@@ -583,3 +583,121 @@ button:focus-visible, textarea:focus-visible {
   }
 }
 
+/* =====================================
+   AI HUB — REFONTE DE LA DISCUSSION
+   ===================================== */
+
+.chat {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  gap: 18px;
+  padding: 14px clamp(2px, 3vw, 20px) 24px;
+}
+
+.message {
+  box-sizing: border-box;
+  position: relative;
+  max-width: min(88%, 760px);
+  padding: 16px 18px;
+  border-radius: 20px;
+  overflow-wrap: anywhere;
+  line-height: 1.65;
+}
+
+.user {
+  align-self: flex-end;
+  border-bottom-right-radius: 7px;
+  background: linear-gradient(
+    135deg,
+    #6552bd,
+    #376fae
+  );
+  box-shadow: 0 8px 24px rgba(65, 75, 170, .16);
+}
+
+.assistant {
+  align-self: flex-start;
+  border-bottom-left-radius: 7px;
+  background: linear-gradient(
+    145deg,
+    rgba(27, 32, 51, .97),
+    rgba(19, 25, 41, .97)
+  );
+  border: 1px solid rgba(164, 178, 220, .16);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .13);
+}
+
+.content {
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.content h1,
+.content h2,
+.content h3 {
+  color: #f0edff;
+  line-height: 1.3;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.content pre {
+  max-width: 100%;
+  overflow-x: auto;
+  border-radius: 13px;
+  padding: 15px;
+}
+
+.content ul,
+.content ol {
+  padding-left: 22px;
+}
+
+.content p {
+  margin: 0 0 12px;
+}
+
+.content p:last-child {
+  margin-bottom: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.action-btn {
+  padding: 7px 12px;
+  font-size: 12px;
+}
+
+@media(max-width: 767px) {
+  .chat {
+    gap: 14px;
+    padding: 10px 1px 18px;
+  }
+
+  .message {
+    max-width: 94%;
+    padding: 14px 15px;
+    font-size: 14px;
+    border-radius: 17px;
+  }
+
+  .user {
+    border-bottom-right-radius: 6px;
+  }
+
+  .assistant {
+    border-bottom-left-radius: 6px;
+  }
+
+  .content pre {
+    padding: 11px;
+    font-size: 12px;
+  }
+}
+
