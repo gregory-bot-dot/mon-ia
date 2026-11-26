@@ -502,3 +502,84 @@ button:focus-visible, textarea:focus-visible {
     font-size: 11px;
   }
 }
+
+/* =====================================
+   AI HUB — ACCUEIL PLEIN ÉCRAN
+   ===================================== */
+
+/* Quand l'accueil est visible, masquer
+   la recherche et la discussion */
+.main:has(#welcome:not([style*="display: none"])) .modes,
+.main:has(#welcome:not([style*="display: none"])) .chat,
+.main:has(#welcome:not([style*="display: none"])) .composer {
+  display: none !important;
+}
+
+/* Garder uniquement le bouton menu en haut */
+.main:has(#welcome:not([style*="display: none"])) .top-bar {
+  margin-bottom: 0;
+}
+
+/* Centrer la page d'accueil */
+.main:has(#welcome:not([style*="display: none"])) .welcome {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+}
+
+/* Présentation compacte des quatre cartes */
+.welcome-actions {
+  width: 100%;
+  max-width: 560px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.welcome-card {
+  min-height: 112px;
+  justify-content: center;
+  padding: 15px;
+  border-radius: 17px;
+}
+
+.welcome-card-desc {
+  font-size: 11px;
+}
+
+/* Adaptation iPhone */
+@media(max-width: 767px) {
+  .main:has(#welcome:not([style*="display: none"])) .welcome {
+    padding: 12px 5px;
+  }
+
+  .main:has(#welcome:not([style*="display: none"])) .welcome h2 {
+    font-size: clamp(25px, 7vw, 32px);
+  }
+
+  .welcome-actions {
+    gap: 9px;
+    margin-top: 22px;
+  }
+
+  .welcome-card {
+    min-height: 105px;
+    padding: 12px 10px;
+    gap: 7px;
+  }
+
+  .welcome-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 19px;
+  }
+}
+
