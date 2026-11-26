@@ -803,3 +803,84 @@ button:focus-visible, textarea:focus-visible {
   }
 }
 
+/* =====================================
+   AI HUB — SIDEBAR PREMIUM
+   ===================================== */
+
+.sidebar {
+  background:
+    radial-gradient(
+      circle at 15% 0%,
+      rgba(112, 85, 220, .13),
+      transparent 35%
+    ),
+    rgba(13, 17, 30, .98);
+  border-right: 1px solid rgba(155, 165, 215, .16);
+}
+
+.sidebar-header {
+  padding-bottom: 20px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(155, 165, 215, .12);
+}
+
+.sidebar-header h1 {
+  background: linear-gradient(110deg, #ffffff, #b9a8ff 55%, #82baff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 21px;
+  letter-spacing: -.7px;
+}
+
+.sidebar .new-chat {
+  min-height: 48px;
+  margin-bottom: 10px;
+  border-radius: 15px;
+  font-size: 14px;
+  box-shadow: 0 8px 24px rgba(112, 83, 255, .22);
+}
+
+.sidebar .link-btn {
+  min-height: 44px;
+  padding: 11px 13px;
+  text-align: left;
+  border-radius: 13px;
+  font-size: 13px;
+  transition: background .2s ease, border-color .2s ease;
+}
+
+.sidebar .link-btn:active {
+  background: rgba(135, 112, 255, .16);
+}
+
+.sidebar .session-list {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(155, 165, 215, .12);
+}
+
+.sidebar .session-item {
+  margin-bottom: 4px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.sidebar .session-item.active {
+  background: linear-gradient(
+    100deg,
+    rgba(130, 101, 255, .17),
+    rgba(65, 130, 230, .08)
+  );
+}
+
+@media(max-width: 767px) {
+  .sidebar {
+    padding-top: calc(16px + env(safe-area-inset-top, 0px));
+  }
+
+  .sidebar-header {
+    padding-bottom: 16px;
+  }
+}
+
