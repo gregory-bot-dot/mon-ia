@@ -1,6 +1,6 @@
-
 // AI HUB — WORKER SECURISE
-// Authentification Firebase + Proxy OpenRouter + sauvegarde KV
+// Auth Firebase (famille) + Proxy OpenRouter + sauvegarde KV
+// Compatible AI Hub site + Menu de la semaine
 
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const FIREBASE_LOOKUP =
@@ -50,21 +50,46 @@ function json(data, status, headers = {}) {
   });
 }
 
+function allowedOrigins(env) {
+  const raw = env.ALLOWED_ORIGINS || env.ALLOWED_ORIGIN || "";
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 function corsHeaders(request, env) {
   const origin = request.headers.get("Origin");
-  const allowed = env.ALLOWED_ORIGIN;
+  const list = allowedOrigins(env);
 
-  if (origin && allowed && origin === allowed) {
+  if (origin && list.includes(origin)) {
     return {
-      "Access-Control-Allow-Origin": allowed,
+      "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
       "Access-Control-Max-Age": "86400",
-      "Vary": "Origin"
+      Vary: "Origin"
     };
   }
 
   return {};
+}
+
+async function lookupFirebase(idToken, apiKey) {
+  const response = await fetch(
+    FIREBASE_LOOKUP + "?key=" + encodeURIComponent(apiKey),
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken })
+    }
+  );
+
+  if (!response.ok) return null;
+
+  const result = await response.json();
+  const user = result.users && result.users[0];
+  return user && user.localId ? user : null;
 }
 
 async function authenticate(request, env) {
@@ -75,11 +100,14 @@ async function authenticate(request, env) {
     return { ok: false, status: 401, error: "Connexion requise." };
   }
 
-  if (
-    !env.FIREBASE_API_KEY ||
-    !env.FIREBASE_PROJECT_ID ||
-    !env.FIREBASE_ALLOWED_UID
-  ) {
+  const idToken = match[1];
+
+  // Projet principal (AI Hub)
+  const primaryKey = env.FIREBASE_API_KEY;
+  // Projet menu (optionnel) — si absent, seul le projet principal est utilisé
+  const menuKey = env.MENU_FIREBASE_API_KEY || env.FIREBASE_API_KEY_MENU;
+
+  if (!primaryKey && !menuKey) {
     return {
       ok: false,
       status: 500,
@@ -88,28 +116,17 @@ async function authenticate(request, env) {
   }
 
   try {
-    const response = await fetch(
-      FIREBASE_LOOKUP + "?key=" +
-      encodeURIComponent(env.FIREBASE_API_KEY),
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken: match[1] })
-      }
-    );
-
-    if (!response.ok) {
-      return { ok: false, status: 401, error: "Session Firebase invalide." };
+    if (primaryKey) {
+      const user = await lookupFirebase(idToken, primaryKey);
+      if (user) return { ok: true, user };
     }
 
-    const result = await response.json();
-    const user = result.users && result.users[0];
-
-    if (!user || user.localId !== env.FIREBASE_ALLOWED_UID) {
-      return { ok: false, status: 403, error: "Accès non autorisé." };
+    if (menuKey && menuKey !== primaryKey) {
+      const user = await lookupFirebase(idToken, menuKey);
+      if (user) return { ok: true, user };
     }
 
-    return { ok: true, user };
+    return { ok: false, status: 401, error: "Session Firebase invalide." };
   } catch {
     return {
       ok: false,
@@ -124,30 +141,26 @@ export default {
     const url = new URL(request.url);
     const cors = corsHeaders(request, env);
     const origin = request.headers.get("Origin");
+    const list = allowedOrigins(env);
 
-    if (
-      origin &&
-      env.ALLOWED_ORIGIN &&
-      origin !== env.ALLOWED_ORIGIN
-    ) {
+    if (origin && list.length && !list.includes(origin)) {
       return json({ error: "Origine non autorisée." }, 403);
     }
 
     if (request.method === "OPTIONS") {
-      if (!origin || !env.ALLOWED_ORIGIN || origin !== env.ALLOWED_ORIGIN) {
+      if (!origin || !list.length || !list.includes(origin)) {
         return new Response(null, { status: 403 });
       }
       return new Response(null, { status: 204, headers: cors });
     }
 
-    // Toutes les routes nécessitent une authentification.
     const auth = await authenticate(request, env);
 
     if (!auth.ok) {
       return json({ error: auth.error }, auth.status, cors);
     }
 
-    // Sauvegarde cloud : nécessite une base KV configurée.
+    // Sauvegarde cloud
     if (url.pathname === "/backup") {
       if (!env.AI_HUB_BACKUP) {
         return json(
@@ -192,7 +205,7 @@ export default {
       return json({ error: "Méthode non autorisée." }, 405, cors);
     }
 
-    // Proxy OpenRouter.
+    // Proxy OpenRouter
     if (url.pathname !== "/" || request.method !== "POST") {
       return json({ error: "Route ou méthode non autorisée." }, 404, cors);
     }
@@ -215,37 +228,27 @@ export default {
       return json({ error: "JSON invalide." }, 400, cors);
     }
 
-    if (
-      !Array.isArray(body.messages) ||
-      body.messages.length === 0
-    ) {
+    if (!Array.isArray(body.messages) || body.messages.length === 0) {
       return json({ error: "Aucun message reçu." }, 400, cors);
     }
 
-    
     const recent = body.messages
-      .filter(m =>
-        m &&
-        ["user", "assistant"].includes(m.role) &&
-        (
-          typeof m.content === "string" ||
-          (
-            Array.isArray(m.content) &&
-            m.content.length > 0 &&
-            m.content.every(part =>
-              part &&
-              (
-                (part.type === "text" && typeof part.text === "string") ||
-                (
-                  part.type === "image_url" &&
-                  part.image_url &&
-                  typeof part.image_url.url === "string" &&
-                  part.image_url.url.startsWith("data:image/")
-                )
-              )
-            )
-          )
-        )
+      .filter(
+        (m) =>
+          m &&
+          ["user", "assistant"].includes(m.role) &&
+          (typeof m.content === "string" ||
+            (Array.isArray(m.content) &&
+              m.content.length > 0 &&
+              m.content.every(
+                (part) =>
+                  part &&
+                  ((part.type === "text" && typeof part.text === "string") ||
+                    (part.type === "image_url" &&
+                      part.image_url &&
+                      typeof part.image_url.url === "string" &&
+                      part.image_url.url.startsWith("data:image/")))
+              )))
       )
       .slice(-MAX_MESSAGES);
 
@@ -253,12 +256,7 @@ export default {
       return json({ error: "Messages invalides." }, 400, cors);
     }
 
-    const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
-      ...recent
-    ];
-
-      
+    const messages = [{ role: "system", content: SYSTEM_PROMPT }, ...recent];
 
     const mode = MODELS[body.mode] ? body.mode : "auto";
     const stream = body.stream !== false;
@@ -270,7 +268,7 @@ export default {
         const upstream = await fetch(API_URL, {
           method: "POST",
           headers: {
-            "Authorization": "Bearer " + env["Ai-Hub"],
+            Authorization: "Bearer " + env["Ai-Hub"],
             "Content-Type": "application/json",
             "X-Title": "AI HUB"
           },
@@ -291,8 +289,8 @@ export default {
         }
 
         const error = await upstream.text();
-        lastError = error.slice(0, 500) ||
-          "Erreur OpenRouter HTTP " + upstream.status;
+        lastError =
+          error.slice(0, 500) || "Erreur OpenRouter HTTP " + upstream.status;
       } catch {
         lastError = "Connexion à OpenRouter impossible.";
       }
@@ -301,4 +299,3 @@ export default {
     return json({ error: lastError }, 502, cors);
   }
 };
-
