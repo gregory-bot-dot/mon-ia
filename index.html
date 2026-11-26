@@ -717,6 +717,8 @@ function useWelcomeAction(mode, starterText, openImage) {
     promptBox.value = starterText;
   }
 
+  document.getElementById("welcome").style.display = "none";
+
   if (openImage) {
     document.getElementById("fileInput").click();
     return;
